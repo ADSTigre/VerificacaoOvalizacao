@@ -9,6 +9,8 @@
 <body>
 
 <div class="container">
+    ${etiquetasHtml}
+</div>
 
 <h1>📏 Controle de Tubos</h1>
 
@@ -43,6 +45,12 @@
     Status: -
 </div>
 
+<label>Observação</label>
+<textarea
+    id="observacao"
+    rows="3"
+    placeholder="Descreva alguma observação sobre o tubo..."
+></textarea>
 <button onclick="salvarMedicao()">
     Salvar Medição
 </button>
