@@ -1,0 +1,104 @@
+*{
+    box-sizing:border-box;
+    font-family:Arial, Helvetica, sans-serif;
+}
+
+body{
+    background:#f2f2f2;
+    margin:0;
+    padding:15px;
+}
+
+.container{
+    max-width:600px;
+    margin:auto;
+}
+
+.card{
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:15px;
+}
+
+label{
+    display:block;
+    margin-top:10px;
+    font-weight:bold;
+}
+
+input, select{
+    width:100%;
+    padding:12px;
+    margin-top:5px;
+    border:1px solid #ccc;
+    border-radius:8px;
+}
+
+button{
+    width:100%;
+    border:none;
+    color:white;
+    background:#0078d7;
+    padding:15px;
+    margin-top:15px;
+    border-radius:8px;
+    font-size:16px;
+}
+
+button:active{
+    opacity:0.8;
+}
+
+#resultado,
+#status{
+    margin-top:15px;
+    font-size:20px;
+    font-weight:bold;
+}
+
+.resumo{
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    margin-bottom:15px;
+}
+
+.acoes{
+    display:grid;
+    grid-template-columns:repeat(4,1fr);
+    gap:5px;
+}
+
+.acoes button{
+    padding:10px;
+    font-size:13px;
+}
+
+.registro{
+    background:white;
+    padding:12px;
+    border-radius:10px;
+    margin-bottom:10px;
+}
+
+.aprovado{
+    border-left:8px solid green;
+}
+
+.retrabalho{
+    border-left:8px solid orange;
+}
+
+.refugo{
+    border-left:8px solid red;
+}
+
+.excluir{
+    background:red;
+    margin-top:10px;
+}
+
+.exportar{
+    background:#28a745;
+}
