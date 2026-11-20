@@ -1,12 +1,24 @@
-// Data atual em PT-BR
+import { db } from "./firebase.js";
+
+import {
+    collection,
+    addDoc,
+    getDocs,
+    deleteDoc,
+    doc
+} from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
 const dataInput = document.getElementById("data");
 dataInput.value = new Date().toLocaleDateString("pt-BR");
 
 let filtroAtual = "Todos";
+let registros = [];
 
-// Eventos para calcular automaticamente
-document.getElementById("medicao1").addEventListener("input", atualizarCalculo);
-document.getElementById("medicao2").addEventListener("input", atualizarCalculo);
+document.getElementById("medicao1")
+    .addEventListener("input", atualizarCalculo);
+
+document.getElementById("medicao2")
+    .addEventListener("input", atualizarCalculo);
 
 function atualizarCalculo() {
 
@@ -19,8 +31,13 @@ function atualizarCalculo() {
     );
 
     if (isNaN(medicao1) || isNaN(medicao2)) {
-        document.getElementById("resultado").innerHTML = "Diferença: -";
-        document.getElementById("status").innerHTML = "Status: -";
+
+        document.getElementById("resultado").innerHTML =
+            "Diferença: -";
+
+        document.getElementById("status").innerHTML =
+            "Status: -";
+
         return;
     }
 
@@ -33,7 +50,7 @@ function atualizarCalculo() {
 
     if (diferenca > 2) {
         status = "🔴 Refugo";
-    } else if (diferenca >= 1.5) {
+    } else if (diferenca >= 1.51) {
         status = "🟡 Retrabalho";
     } else {
         status = "✅ Aprovado";
@@ -43,10 +60,13 @@ function atualizarCalculo() {
         `Status: ${status}`;
 }
 
-function salvarMedicao() {
+async function salvarMedicao() {
 
-    const data = document.getElementById("data").value;
-    const turno = document.getElementById("turno").value;
+    const data =
+        document.getElementById("data").value;
+
+    const turno =
+        document.getElementById("turno").value;
 
     const medicao1 = parseFloat(
         document.getElementById("medicao1").value.replace(",", ".")
@@ -61,63 +81,88 @@ function salvarMedicao() {
         return;
     }
 
-    const diferenca = Math.abs(medicao1 - medicao2);
+    const diferenca =
+        Math.abs(medicao1 - medicao2);
 
     let status = "";
 
     if (diferenca > 2) {
         status = "Refugo";
-    } else if (diferenca >= 1.5) {
+    } else if (diferenca >= 1.51) {
         status = "Retrabalho";
     } else {
         status = "Aprovado";
     }
 
-    const registro = {
-        data,
-        turno,
-        medicao1,
-        medicao2,
-        diferenca: diferenca.toFixed(2),
-        status
-    };
+    try {
 
-    const registros =
-        JSON.parse(localStorage.getItem("tubos")) || [];
+        await addDoc(
+            collection(db, "tubos"),
+            {
+                data,
+                turno,
+                medicao1,
+                medicao2,
+                diferenca: diferenca.toFixed(2),
+                status,
+                criadoEm: new Date()
+            }
+        );
 
-    registros.push(registro);
+        document.getElementById("medicao1").value = "";
+        document.getElementById("medicao2").value = "";
 
-    localStorage.setItem(
-        "tubos",
-        JSON.stringify(registros)
-    );
+        document.getElementById("resultado").innerHTML =
+            "Diferença: -";
 
-    document.getElementById("medicao1").value = "";
-    document.getElementById("medicao2").value = "";
+        document.getElementById("status").innerHTML =
+            "Status: -";
 
-    document.getElementById("resultado").innerHTML = "Diferença: -";
-    document.getElementById("status").innerHTML = "Status: -";
+        carregarRegistros();
 
-    carregarRegistros();
+    } catch (erro) {
+
+        console.error(erro);
+
+        alert("Erro ao salvar no Firestore.");
+    }
 }
 
-function carregarRegistros() {
+async function carregarRegistros() {
 
-    const historico = document.getElementById("historico");
+    const historico =
+        document.getElementById("historico");
+
     historico.innerHTML = "";
 
-    const registros =
-        JSON.parse(localStorage.getItem("tubos")) || [];
+    registros = [];
+
+    const snapshot =
+        await getDocs(collection(db, "tubos"));
+
+    snapshot.forEach(item => {
+
+        registros.push({
+            id: item.id,
+            ...item.data()
+        });
+
+    });
 
     let aprovados = 0;
     let retrabalho = 0;
     let refugo = 0;
 
-    registros.forEach((registro, index) => {
+    registros.forEach(registro => {
 
-        if (registro.status === "Aprovado") aprovados++;
-        if (registro.status === "Retrabalho") retrabalho++;
-        if (registro.status === "Refugo") refugo++;
+        if (registro.status === "Aprovado")
+            aprovados++;
+
+        if (registro.status === "Retrabalho")
+            retrabalho++;
+
+        if (registro.status === "Refugo")
+            refugo++;
 
         if (
             filtroAtual !== "Todos" &&
@@ -128,9 +173,14 @@ function carregarRegistros() {
 
         let classe = "";
 
-        if (registro.status === "Aprovado") classe = "aprovado";
-        if (registro.status === "Retrabalho") classe = "retrabalho";
-        if (registro.status === "Refugo") classe = "refugo";
+        if (registro.status === "Aprovado")
+            classe = "aprovado";
+
+        if (registro.status === "Retrabalho")
+            classe = "retrabalho";
+
+        if (registro.status === "Refugo")
+            classe = "refugo";
 
         const div = document.createElement("div");
 
@@ -145,33 +195,33 @@ function carregarRegistros() {
             ➖ Diferença: ${registro.diferenca}"<br><br>
 
             <button class="excluir"
-                onclick="excluir(${index})">
+                onclick="excluir('${registro.id}')">
                 🗑️ Excluir
             </button>
         `;
 
         historico.appendChild(div);
+
     });
 
-    document.getElementById("aprovados").innerText = aprovados;
-    document.getElementById("retrabalho").innerText = retrabalho;
-    document.getElementById("refugo").innerText = refugo;
+    document.getElementById("aprovados").innerText =
+        aprovados;
+
+    document.getElementById("retrabalho").innerText =
+        retrabalho;
+
+    document.getElementById("refugo").innerText =
+        refugo;
 }
 
-function excluir(index) {
+async function excluir(id) {
 
     if (!confirm("Deseja excluir este registro?")) {
         return;
     }
 
-    const registros =
-        JSON.parse(localStorage.getItem("tubos")) || [];
-
-    registros.splice(index, 1);
-
-    localStorage.setItem(
-        "tubos",
-        JSON.stringify(registros)
+    await deleteDoc(
+        doc(db, "tubos", id)
     );
 
     carregarRegistros();
@@ -185,66 +235,74 @@ function filtrar(status) {
 }
 
 function exportarPDF() {
-    const registros =
-        JSON.parse(localStorage.getItem("tubos")) || [];
 
     const { jsPDF } = window.jspdf;
+
     const doc = new jsPDF("landscape");
 
     const agrupados = {};
 
     registros.forEach(r => {
+
         const chave = `${r.data}|${r.turno}`;
 
         if (!agrupados[chave]) {
+
             agrupados[chave] = {
                 data: r.data,
                 turno: r.turno,
                 aprovado: 0,
-                analise: 0,
-                reprovado: 0
+                retrabalho: 0,
+                refugo: 0
             };
         }
 
-    if (r.status === "Aprovado") {
-    agrupados[chave].aprovado++;
-} else if (r.status === "Retrabalho") {
-    agrupados[chave].analise++;
-} else if (r.status === "Refugo") {
-    agrupados[chave].reprovado++;
-}
-
+        if (r.status === "Aprovado") {
+            agrupados[chave].aprovado++;
+        }
+        else if (r.status === "Retrabalho") {
+            agrupados[chave].retrabalho++;
+        }
+        else if (r.status === "Refugo") {
+            agrupados[chave].refugo++;
+        }
     });
 
     let totalAprovado = 0;
-    let totalAnalise = 0;
-    let totalReprovado = 0;
+    let totalRetrabalho = 0;
+    let totalRefugo = 0;
 
-    const linhas = Object.values(agrupados).map(item => {
+    const linhas =
+        Object.values(agrupados).map(item => {
 
-        totalAprovado += item.aprovado;
-        totalAnalise += item.analise;
-        totalReprovado += item.reprovado;
+            totalAprovado += item.aprovado;
+            totalRetrabalho += item.retrabalho;
+            totalRefugo += item.refugo;
 
-        return [
-            item.data,
-            item.turno,
-            item.aprovado,
-            item.analise,
-            item.reprovado
-        ];
-    });
+            return [
+                item.data,
+                item.turno,
+                item.aprovado,
+                item.retrabalho,
+                item.refugo
+            ];
+        });
 
     linhas.push([
         "TOTAL",
         "",
         totalAprovado,
-        totalAnalise,
-        totalReprovado
+        totalRetrabalho,
+        totalRefugo
     ]);
 
     doc.setFontSize(16);
-    doc.text("RELATÓRIO DE TUBOS", 14, 15);
+
+    doc.text(
+        "RELATÓRIO DE TUBOS",
+        14,
+        15
+    );
 
     doc.autoTable({
         startY: 25,
@@ -252,8 +310,8 @@ function exportarPDF() {
             "Data",
             "Turno",
             "Aprovado",
-            "Em Análise",
-            "Reprovado"
+            "Retrabalho",
+            "Refugo"
         ]],
         body: linhas,
         theme: "grid",
@@ -265,5 +323,9 @@ function exportarPDF() {
     doc.save("Relatorio_Tubos.pdf");
 }
 
+window.salvarMedicao = salvarMedicao;
+window.excluir = excluir;
+window.filtrar = filtrar;
+window.exportarPDF = exportarPDF;
 
 carregarRegistros();
