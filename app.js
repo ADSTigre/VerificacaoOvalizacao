@@ -41,20 +41,22 @@ function atualizarCalculo() {
         return;
     }
 
-    const diferenca = Math.abs(medicao1 - medicao2);
+  const diferencaMm = Math.abs(medicao1 - medicao2);
+const diferencaPol = diferencaMm / 25.4;
 
-    document.getElementById("resultado").innerHTML =
-        `Diferença: ${diferenca.toFixed(2)} pol`;
+document.getElementById("resultado").innerHTML =
+    `Diferença: ${diferencaMm.toFixed(2)} mm (${diferencaPol.toFixed(2)} pol)`;
+
 
     let status = "";
 
-    if (diferenca > 2) {
-        status = "🔴 Refugo";
-    } else if (diferenca >= 1.51) {
-        status = "🟡 Retrabalho";
-    } else {
-        status = "✅ Aprovado";
-    }
+ if (diferencaPol > 2) {
+    status = "🔴 Refugo";
+} else if (diferencaPol > 1.51 ) {
+    status = "🟡 Retrabalho";
+} else {
+    status = "✅ Aprovado";
+}
 
     document.getElementById("status").innerHTML =
         `Status: ${status}`;
@@ -81,14 +83,17 @@ async function salvarMedicao() {
         return;
     }
 
-    const diferenca =
-        Math.abs(medicao1 - medicao2);
+const diferencaMm =
+    Math.abs(medicao1 - medicao2);
+
+const diferencaPol =
+    diferencaMm / 25.4;
 
     let status = "";
 
-    if (diferenca > 2) {
+    if (diferencapol > 2) {
         status = "Refugo";
-    } else if (diferenca >= 1.51) {
+    } else if (diferencapol >= 1.51) {
         status = "Retrabalho";
     } else {
         status = "Aprovado";
@@ -103,7 +108,8 @@ async function salvarMedicao() {
                 turno,
                 medicao1,
                 medicao2,
-                diferenca: diferenca.toFixed(2),
+               diferencaMm: diferencaMm.toFixed(2),
+               diferencaPol: diferencaPol.toFixed(3),
                 status,
                 criadoEm: new Date()
             }
@@ -192,7 +198,7 @@ async function carregarRegistros() {
             👷 Turno: ${registro.turno}<br>
             📏 Medição 1: ${registro.medicao1}"<br>
             📏 Medição 2: ${registro.medicao2}"<br>
-            ➖ Diferença: ${registro.diferenca}"<br><br>
+           ➖ Diferença: ${registro.diferencaMm} mm (${registro.diferencaPol} pol)<br>
 
             <button class="excluir"
                 onclick="excluir('${registro.id}')">
