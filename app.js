@@ -5,8 +5,10 @@ import {
     addDoc,
     getDocs,
     deleteDoc,
+    updateDoc,
     doc
 } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore.js";
+
 let idEdicao = null;
 const dataInput = document.getElementById("data");
 dataInput.value = new Date().toLocaleDateString("pt-BR");
@@ -81,7 +83,7 @@ async function salvarMedicao() {
         document.getElementById("medicao2").value.replace(",", ".")
     );
 
-    document.getElementById("observacao").value = "";
+    
     if (isNaN(medicao1) || isNaN(medicao2)) {
         alert("Informe as duas medições.");
         return;
@@ -134,6 +136,7 @@ if (idEdicao) {
         collection(db, "tubos"),
         dados
     );
+    document.getElementById("observacao").value = "";
 }
 
         document.getElementById("medicao1").value = "";
@@ -148,11 +151,13 @@ if (idEdicao) {
         carregarRegistros();
 
     } catch (erro) {
+    console.error("Firestore:", erro);
 
-        console.error(erro);
-
-        alert("Erro ao salvar no Firestore.");
-    }
+    alert(
+        "Erro: " +
+        erro.message
+    );
+}
 }
 
 async function carregarRegistros() {
