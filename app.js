@@ -52,9 +52,9 @@ document.getElementById("resultado").innerHTML =
 
     let status = "";
 
- if (diferencaPol > 2) {
+ if (diferencaPol > 2.05) {
     status = "🔴 Refugo";
-} else if (diferencaPol > 1.51 ) {
+} else if (diferencaPol > 2.01 ) {
     status = "🟡 Retrabalho";
 } else {
     status = "✅ Aprovado";
