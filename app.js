@@ -97,9 +97,9 @@ const diferencaPol =
 
     let status = "";
 
-    if (diferencaPol > 2) {
+    if (diferencaPol > 2.21) {
         status = "Refugo";
-    } else if (diferencaPol >= 1.51) {
+    } else if (diferencaPol >= 2.00) {
         status = "Retrabalho";
     } else {
         status = "Aprovado";
