@@ -52,7 +52,7 @@ document.getElementById("resultado").innerHTML =
 
     let status = "";
 
- if (diferencaPol > 2.05) {
+ if (diferencaPol > 2.3) {
     status = "🔴 Refugo";
 } else if (diferencaPol > 2.01 ) {
     status = "🟡 Retrabalho";
@@ -97,7 +97,7 @@ const diferencaPol =
 
     let status = "";
 
-    if (diferencaPol > 2.2) {
+    if (diferencaPol > 2.3) {
         status = "Refugo";
     } else if (diferencaPol >= 2.01) {
         status = "Retrabalho";
@@ -351,6 +351,50 @@ function exportarPDF() {
 
     desenharCabecalho();
 
+    const resumoPorDia = {};
+
+registros.forEach(r => {
+
+    if (!resumoPorDia[r.data]) {
+        resumoPorDia[r.data] = {
+            total: 0,
+            aprovados: 0,
+            retrabalho: 0,
+            refugo: 0
+        };
+    }
+
+    resumoPorDia[r.data].total++;
+
+    if (r.status === "Aprovado")
+        resumoPorDia[r.data].aprovados++;
+
+    if (r.status === "Retrabalho")
+        resumoPorDia[r.data].retrabalho++;
+
+    if (r.status === "Refugo")
+        resumoPorDia[r.data].refugo++;
+});
+let yResumo = 45;
+doc.setFontSize(11);
+doc.setFont(undefined, "bold");
+doc.text("RESUMO POR DIA", 10, yResumo);
+
+yResumo += 8;
+
+doc.setFont(undefined, "normal");
+doc.setFontSize(9);
+
+Object.entries(resumoPorDia).forEach(([data, r]) => {
+
+    doc.text(
+        `${data} | Total: ${r.total} | Aprovados: ${r.aprovados} | Retrabalho: ${r.retrabalho} | Refugo: ${r.refugo}`,
+        10,
+        yResumo
+    );
+
+    yResumo += 6;
+});
 registros.forEach((registro, indice) => {
 
     const posicaoPagina = indice % 12;
@@ -364,7 +408,7 @@ registros.forEach((registro, indice) => {
     const linha = Math.floor(posicaoPagina / 3);
 
     const x = 8 + (coluna * 65);
-    const y = 45 + (linha * 56);
+    const y = 70 + (linha * 56);
 
     let cor = [230, 255, 230];
 
